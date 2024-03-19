@@ -17,7 +17,6 @@ library(plotly)
 library(stringr)
 library(purrr)
 library(ggplot2)
-library(shinythemes)
 library(bslib)
 
 
