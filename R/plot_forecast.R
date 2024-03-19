@@ -1,9 +1,14 @@
-plot_forecast = function(dbs, last_updated_date = today(), 
+plot_forecast = function(dbs, 
+                         disease_name = "Malaria",
+                         last_updated_date = today(), 
                          color_vals = c("deepskyblue4","tomato3")){
-  ggplot(dbs) +
-    geom_ribbon(aes(x = date, ymin = low, ymax = upp, fill = type),
+  dbs %>% 
+    filter(disease == !!disease_name) %>% 
+    ggplot() +
+    geom_ribbon(aes(x = date, ymin = incident_cases_low, 
+                    ymax = incident_cases_upp, fill = type),
                 alpha = 0.5) +
-    geom_line(aes(x = date, y = Malaria_Cases, 
+    geom_line(aes(x = date, y = incident_cases, 
                   color = type)) +
     labs(title = NULL,
          caption = paste0("Atualizado: ", last_updated_date),
