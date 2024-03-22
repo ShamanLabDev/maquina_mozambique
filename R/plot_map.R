@@ -8,8 +8,6 @@ plot_map = function(all_data, mozmap, nweeks = 2, maxrate,
   
   maxdate = get_maxdate(all_data)
 
-  #TODO: Create this at the beginning as cummulative observed
-  #Get incidence of past and upcomming weeks as well as the trend
   summary_data = all_data %>% 
     filter(disease == !!disease_name & type == !!type) %>% 
     filter(date  > !!maxdate - weeks(nweeks) & 
@@ -51,6 +49,10 @@ plot_map = function(all_data, mozmap, nweeks = 2, maxrate,
 
 }
 
+#' Create legend for the map plot
+#' 
+#' @param 
+#' 
 plot_rateguide = function(maxrate = 10, nweeks = 2,
                           color_vals = wesanderson::wes_palette("Zissou1")){
   
