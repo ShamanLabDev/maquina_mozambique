@@ -1,18 +1,27 @@
-plot_map = function(db, mapdata, 
+plot_map = function(all_data, mozmap, nweeks = 2, maxrate,
                     disease_name = "Malaria",
-                    title = "Previous cases",
+                    title = "Cases",
+                    type = "Observado",
                     bg_color = "white", 
-                    color_vals = c("forestgreen","darkslategray3","darkslategray2",
-                               "gray75","gold","orange2","tomato3")){
+                    color_vals = wesanderson::wes_palette("Zissou1")){
+
   
-  plot_db = db %>% 
-    filter(disease == !!disease_name) %>% 
-    left_join(mapdata, by = join_by(Region)) %>% 
-    mutate(trend_fmt = scales::comma(incident_cases,accuracy = 1)) %>% 
-    mutate(trend_pct = scales::percent(trend,accuracy = 1)) %>% 
-    mutate(text = paste0("<b>", Region,"</b>", "<br>", trend_fmt, " (", trend_pct, ")")) %>% 
-    ggplot() +
-    geom_sf(aes(geometry = geometry, fill = trend, text = text), 
+  maxdate = get_maxdate(all_data)
+
+  #TODO: Create this at the beginning as cummulative observed
+  #Get incidence of past and upcomming weeks as well as the trend
+  summary_data = all_data %>% 
+    filter(disease == !!disease_name & type == !!type) %>% 
+    filter(date  > !!maxdate - weeks(nweeks) & 
+             date <  !!maxdate + weeks(nweeks)) %>% 
+    group_by(Region) %>% 
+    summarise(rate = sum(rate), .groups = "drop") %>% 
+    mutate(trend_fmt = scales::comma(rate, accuracy = 0.01)) %>% 
+    mutate(text = paste0("<b>", Region,"</b>", "<br>", trend_fmt,"/1000 habitantes")) %>% 
+    left_join(mozmap, by = join_by(Region))
+
+  plot_db = ggplot(summary_data) +
+    geom_sf(aes(geometry = geometry, fill = rate, text = text), 
             color = "white", linewidth = 0.1) +
     theme_void() +
     theme(
@@ -26,18 +35,53 @@ plot_map = function(db, mapdata,
       panel.spacing    = unit(0, "lines"), 
       plot.background  = element_blank(), 
       legend.justification = c(0, 0), 
-      legend.position  = "bottom",
+      legend.position  = "none",
     ) +
-    ggtitle(title) +
+    ggtitle(title) + 
     scale_fill_gradientn("",
-                         labels = scales::percent_format(),
-                         rescaler = ~ (. + 1)/2,
+                         labels = scales::comma_format(),
+                         rescaler = ~ 1 / (1 + exp(-(./nweeks -  maxrate/2))),
                          colors = color_vals,
-                         values = c(0.0,0.25,0.499, 0.5, 0.5001,0.75, 1)) 
-
+                         values = c(0,0.1,0.5,0.6,0.8,1)) 
+  
   #https://rpubs.com/rubenfbc/interactive_maps_b
   ggplotly(plot_db, tooltip = "text") %>% 
     config(displayModeBar = FALSE) %>% 
     style(hoverlabel = list(bgcolor = bg_color), hoveron = "text")
 
+}
+
+plot_rateguide = function(maxrate = 10, nweeks = 2,
+                          color_vals = wesanderson::wes_palette("Zissou1")){
+  
+  dbf = tibble(y = seq(0, nweeks*maxrate, length.out = 100), 
+               x = 1 / (1 + exp(-(y/nweeks -  maxrate/2)))) 
+  
+  plot_df = ggplot() +
+    geom_tile(aes(x = 0, y = y, fill = x), data = dbf) +
+    scale_fill_gradientn("",
+                         labels = scales::comma_format(),
+                         rescaler = ~ .,
+                         colors = color_vals,
+                         values = c(0,0.1,0.5,0.6,0.8,1)) +
+    theme_minimal() +
+    theme(
+      axis.line.x  = element_blank(), 
+      axis.text.x  = element_blank(), 
+      axis.ticks.x = element_blank(), 
+      axis.title.x = element_blank(), 
+      panel.background = element_blank(), 
+      panel.border     = element_blank(), 
+      panel.grid       = element_blank(), 
+      panel.spacing    = unit(0, "lines"), 
+      plot.background  = element_blank(), 
+      legend.justification = c(0, 0), 
+      legend.position = "none"
+    ) +
+    ylab("Taxa por 1,000 habitantes")
+  
+   ggplotly(plot_df, tooltip = NULL) %>% 
+    config(displayModeBar = FALSE) %>% 
+    layout(xaxis = list(fixedrange = TRUE), yaxis = list(fixedrange = TRUE))
+  
 }

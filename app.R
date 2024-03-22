@@ -14,11 +14,16 @@ library(readr)
 library(dplyr)
 library(lubridate)
 library(plotly)
-library(stringr)
 library(purrr)
 library(ggplot2)
 library(bslib)
 
+# Define a function to generate a plot
+generate_plot <- function(region) {
+  # Example plot, replace this with your actual plotting function
+  plot <- plot_ly(x = 1:10, y = rnorm(10), type = 'scatter', mode = 'lines', name = region)
+  return(plot)
+}
 
 #Source all files of additional functions
 list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>% 
@@ -27,30 +32,17 @@ list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>%
 #Get the time of the last update of the data
 last_updated_date = as.Date(file.info("data.csv")$ctime)
 
+#Get the shapefiles for the map
 mozmap = preprocess_map()
 
 #Read the data in a robust way
-all_data = read_csv("data.csv", 
-                    col_types = cols(
-                       Region  = col_character(),
-                       disease = col_character(),
-                       .default = col_double(),
-                       date = col_date(format = "%Y-%m-%d"),
-                       type = col_character()
-                      )) %>% 
-  filter(year(date) > 2018) 
+all_data = get_data()
 
-number_of_predicted_dates = all_data %>% 
-  group_by(type) %>% 
-  summarise(dmax = max(date)) %>% 
-  ungroup() %>% 
-  mutate(dmax = as.numeric(difftime(dmax, lag(dmax), units = "weeks"))) %>% 
-  filter(!is.na(dmax)) %>% 
-  mutate(dmax = abs(dmax)) %>% 
-  pull(dmax)
+maxrate  = max(all_data$rate)
+
 
 summary_data = all_data %>% 
-  filter(date  > max(date) - weeks(2*number_of_predicted_dates)) %>% 
+  filter(date  > max(date) - weeks(2*5)) %>% 
   group_by(Region, type, disease) %>% 
   summarise(
     incident_cases = sum(incident_cases), 
@@ -65,8 +57,6 @@ summary_data = all_data %>%
   select(-type) %>% 
   mutate(period = paste0(format(min_date,"%b %d"), " a " ,format(max_date,"%b %d"))) %>% 
   select(-min_date, -max_date)
-
-
 
 #Calculate the percent change in 
 
@@ -96,6 +86,10 @@ ui <- fluidPage(theme = bs_theme(preset = "sandstone", version = 5),
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
+  week_input <- reactive({
+    input$nweeks
+  })
+  
   output$malaria_table <- renderReactable({
     table_trend_cases(summary_data, disease_name = "Malaria")
   })
@@ -105,30 +99,60 @@ server <- function(input, output) {
   })
   
   output$malaria_map_past <- renderPlotly({
-    plot_map(summary_data, mapdata = mozmap, disease_name = "Malaria",
-             title = "Casos pasados")
+    plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
+             disease_name = "Malaria", type = "Observado",
+             title = paste0("Últimas ", week_input(), " semanas"))
+  })
+  
+  output$malaria_range_ruler <- renderPlotly({
+    plot_rateguide(maxrate = maxrate, nweeks = week_input())
   })
   
   output$malaria_map_future <- renderPlotly({
-    plot_map(summary_data, mapdata = mozmap, disease_name = "Malaria",
-             title = "Casos previstos")
+    plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
+             disease_name = "Malaria", type = "Previsto",
+             title = paste0("Próximas ", week_input(), " semanas"))
   })
   
-  output$diarrhea_map <- renderPlotly({
-    plot_map(summary_data, mapdata = mozmap, disease_name = "Diarrhea")
+  # Number of plots to generate
+  num_plots <- 5
+  
+  # Initialize list to store plot render functions
+  plot_outputs <<- list()
+  
+  # Generate plots and add render functions to list
+  for (i in 1:num_plots) {
+    region <- paste0("Region ", i)
+    plot_output_name <- paste0("plot", i)
+    output[[plot_output_name]] <- renderPlotly({
+      generate_plot(region)
+    })
+    plot_outputs[[i]] <<- plot_output_name
+  }
+  
+  # Render the dynamically generated plotlyOutput elements
+  output$plot_outputs <- renderUI({
+    plot_outputs <- lapply(plot_outputs, function(plot_output_name) {
+      plotlyOutput(plot_output_name)
+    })
+    do.call(tagList, plot_outputs)
   })
   
-  output$malaria_plot <- renderPlot({
-    plot_forecast(all_data, last_updated_date = last_updated_date, 
-                  disease_name = "Malaria")
-  },
-  res = 100)
+  # output$plots_combined <- 
+  #   map(set_names(unique(all_data$Region)),
+  #       ~renderPlotly({
+  #         plot_forecast(all_data, last_updated_date = last_updated_date,
+  #                       region = ., disease_name = "Malaria")
+  #           }, env = output$plots_combined))
+  # 
+  # output$plot_output <- renderUI({
+  #    uiOutput("plots_combined")
+  # })
   
-  output$diarrhea_plot <- renderPlot({
-    plot_forecast(all_data, last_updated_date = last_updated_date,
-                  disease_name = "Diarrhea")
-  },
-  res = 100)
+  # output$diarrhea_plot <- renderPlotly({
+  #   plot_forecast(all_data, last_updated_date = last_updated_date,
+  #                 disease_name = "Diarrhea")
+  # })
 }
 
 # Run the application 

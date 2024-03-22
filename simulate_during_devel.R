@@ -49,9 +49,9 @@ simulated_data = simulated_data %>%
   mutate(incident_cases_upp = if_else(change < predicted_weeks, 1.25*incident_cases_upp, incident_cases_upp)) %>% 
   mutate(type = if_else(change < predicted_weeks, "Previsto", type)) %>% 
   select(-change,-EpiWeek ) %>% 
-  mutate(rate = incident_cases/10000) %>% 
-  mutate(rate_low = incident_cases_low/10000) %>% 
-  mutate(rate_up = incident_cases_upp/10000) %>% 
+  mutate(rate = 100*incident_cases/10000) %>% 
+  mutate(rate_low = 100*incident_cases_low/10000) %>% 
+  mutate(rate_up = 100*incident_cases_upp/10000) %>% 
   select(date, Region, starts_with("incident_cases"), starts_with("rate"), everything()) %>% 
   mutate(disease = "Malaria")
   

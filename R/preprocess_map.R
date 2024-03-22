@@ -25,8 +25,8 @@
 preprocess_map = function(mapname = "mapfiles/moz_admbnda_adm1_ine_20190607.shp"){
   read_sf(mapname) %>% 
     mutate(Region = case_when(
-      str_detect(ADM1_PT,"City") ~ "Maputo (cidade)",
-      str_detect(ADM1_PT,"Zambez") ~ "Zambézia",
+      ADM1_PT == "Maputo City" ~ "Maputo (cidade)",
+      ADM1_PT == "Zambezia" ~ "Zambézia",
       .default = ADM1_PT
     ))
 }
