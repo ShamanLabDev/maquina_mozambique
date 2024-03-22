@@ -6,12 +6,12 @@ plot_map = function(all_data, mozmap, nweeks = 2, maxrate,
                     color_vals = wesanderson::wes_palette("Zissou1")){
 
   
-  maxdate = get_maxdate(all_data)
+  maxdate = get_maxdate(all_data) + days(1)
 
   summary_data = all_data %>% 
     filter(disease == !!disease_name & type == !!type) %>% 
-    filter(date  > !!maxdate - weeks(nweeks) & 
-             date <  !!maxdate + weeks(nweeks)) %>% 
+    filter(date  >= !!maxdate - weeks(nweeks) & 
+             date <=  !!maxdate + weeks(nweeks)) %>% 
     group_by(Region) %>% 
     summarise(rate = sum(rate), .groups = "drop") %>% 
     mutate(trend_fmt = scales::comma(rate, accuracy = 0.01)) %>% 

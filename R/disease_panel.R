@@ -1,15 +1,17 @@
 get_disease_panel = function(tabname = "Malária", value = "malaria"){
   tabPanel(tabname,
      #Initial text----
-     fluidRow(
-       column(12,
-          h2(tabname),
-          p("This text is automatic from the data:
-             A total of 1,000 new cases are expected in the next two weeks
-             with Cabo Delgado (1,181), Maputo (1,539), and Gaza (1,539) 
-             seeing the largest increase. The trend is currently decreasing 
-             with the highest decrements happening in Nampula, Maputo, and Sofala.")
-      )),
+     card(
+       fluidRow(
+         column(12,
+            h2(tabname, class = "lead mt-3"),
+            p("This text is automatic from the data:
+               A total of 1,000 new cases are expected in the next two weeks
+               with Cabo Delgado (1,181), Maputo (1,539), and Gaza (1,539) 
+               seeing the largest increase. The trend is currently decreasing 
+               with the highest decrements happening in Nampula, Maputo, and Sofala.")
+        )),
+     ),
      #Plots----
      card(
        card_header("Incidência [Total de casos]"),
@@ -25,16 +27,19 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
                 plotlyOutput(paste0(value,"_map_future"), width = "100%")
          )
        ),
+     )),
+     card(
+       card_header(
        fluidRow(
          column(4, offset = 4,
-            sliderInput("nweeks", "Number of weeks:",
-                        min = 2, max = 16, value = 2, step = 1, width = "100%"),
-            )
-       )
-     )),
+                sliderInput("nweeks", "Número de semanas:",
+                            min = 1, max = 16, value = 2, step = 1, width = "100%"),
+         )
+       ))
+     ),
      #Table-----
      card(
-       card_header("Data"),
+       card_header("Dados"),
        fluidRow(
          column(12, align="center",
                 reactableOutput(paste0(value,"_table"), height = "500px", width = "100%"),
@@ -50,10 +55,10 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
        #    plotlyOutput("Maputo", height = "100px", width = "100%")
        #),
      ),                
-     p("Please remember that this dashboard's projections are generated 
-             by an automated model and may contain errors. Understanding 
-           epidemiological concepts is essential for accurate 
-           interpretation. Consult additional sources for context."),
+     p("Lembre-se de que as projecções neste painel são geradas por um modelo 
+        automatizado e podem conter erros. A compreensão dos  conceitos 
+        epidemiológicos é essencial para uma interpretação correcta. 
+        Consulte fontes adicionais para obter o contexto."),
      card(
        fluidRow(
          column(6, align="center", offset = 3,

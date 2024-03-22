@@ -39,10 +39,12 @@ mozmap = preprocess_map()
 all_data = get_data()
 
 maxrate  = max(all_data$rate)
+maxdate = get_maxdate(all_data) + days(1)
 
-
+nweeks = 2
 summary_data = all_data %>% 
-  filter(date  > max(date) - weeks(2*5)) %>% 
+  filter(date  >= !!maxdate - weeks(nweeks) & 
+           date <=  !!maxdate + weeks(nweeks)) %>%   
   group_by(Region, type, disease) %>% 
   summarise(
     incident_cases = sum(incident_cases), 
@@ -61,26 +63,13 @@ summary_data = all_data %>%
 #Calculate the percent change in 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(theme = bs_theme(preset = "sandstone", version = 5),
+ui <- navbarPage(theme = bs_theme(preset = "sandstone", version = 5),
 
     # Application title
-    titlePanel("MÁQUINA: Modelo de Análise Quantitativa para Doenças Infecciosas"),
-
-    mainPanel(
-      tabsetPanel(
-        id = "tabset",
-        get_disease_panel("Malária", "malaria"),
-        get_disease_panel("Doenças diarréicas","diarrhea"),
- 
-        
-        tabPanel("Sobre", 
-                 h2("Brief explanation of the model here"),
-                 p("bla bla bla"),
-                 value = "about"),
-        
-      ),
-      width = 12
-    )
+    title = "MÁQUINA:", # Modelo de Análise Quantitativa para Doenças Infecciosas
+    get_disease_panel("Malária", "malaria"),
+    get_disease_panel("Doenças diarréicas","diarrhea"),
+    get_sobre_panel(),
 )
 
 # Define server logic required to draw a histogram
