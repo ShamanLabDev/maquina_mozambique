@@ -1,3 +1,17 @@
+#' Create reactable table for cases / trend
+#' 
+#' Creates the table specifiying cases and trend
+#' 
+#' @details 
+#' The table changes as the number of weeks changes to specify the date
+#' range from when the data is collected. 
+#' 
+#' @param all_data Data frame containing all the data
+#' @param nweeks Number of weeks in the analysis 
+#' @param disease_name Name of the disease in `all_data`
+#' @param fill_color Colours to show increase and decrease
+#' 
+#' @return A reactable that includes cases and rates per region
 table_trend_cases = function(all_data, nweeks = 2,
                              disease_name = "Malaria",
                              fill_color = c("#78B7C5", "#E1AF00")){

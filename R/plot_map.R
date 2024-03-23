@@ -22,13 +22,14 @@
 #' 
 #' @return A plotly object with the legend. 
 plot_map = function(all_data, mozmap, nweeks = 2, 
-                    maxrate = max(all_data$rate),
                     disease_name = "Malaria",
                     title = "Cases",
                     type = c("Observado", "Previsto"),
                     bg_color = "white", 
                     color_vals = wesanderson::wes_palette("Zissou1")){
 
+  #Get the maximum observed rate for color palette
+  maxrate = get_maxrate(all_data, disease_name)
   
   #Obtain the data for the disease, type and dates of analysis
   summary_data = filter_nweeks(all_data, nweeks, disease_name, type)
@@ -86,38 +87,41 @@ plot_map = function(all_data, mozmap, nweeks = 2,
 #' @param  color_vals Color palette for the legend.
 #' 
 #' @return A plotly object with the legend. 
-plot_rateguide = function(maxrate = 10, nweeks = 2,
+plot_rateguide = function(all_data, disease_name = "Malaria", nweeks = 2,
                           color_vals = wesanderson::wes_palette("Zissou1")){
   
-    (
-      tibble(
-        y = seq(0, nweeks*maxrate, length.out = 100), 
-        x = 1 / (1 + exp(-(y/nweeks -  maxrate/2)))
-      ) %>% 
-      ggplot() +
-        geom_tile(aes(x = 0, y = y, fill = x)) +
-        scale_fill_gradientn("",
-                             labels = scales::comma_format(),
-                             rescaler = ~ .,
-                             colors = color_vals,
-                             values = c(0,0.1,0.5,0.6,0.8,1)) +
-        theme_minimal() +
-        theme(
-          axis.line.x  = element_blank(), 
-          axis.text.x  = element_blank(), 
-          axis.ticks.x = element_blank(), 
-          axis.title.x = element_blank(), 
-          panel.background = element_blank(), 
-          panel.border     = element_blank(), 
-          panel.grid       = element_blank(), 
-          panel.spacing    = unit(0, "lines"), 
-          plot.background  = element_blank(), 
-          legend.justification = c(0, 0), 
-          legend.position = "none"
-        ) +
-        ylab("Taxa por 1,000 habitantes")
+  #Get the maximum observed rate for color palette
+  maxrate = get_maxrate(all_data, disease_name)
+  
+  (
+    tibble(
+      y = seq(0, nweeks*maxrate, length.out = 100), 
+      x = 1 / (1 + exp(-(y/nweeks -  maxrate/2)))
     ) %>% 
-    ggplotly(tooltip = NULL) %>% 
-      config(displayModeBar = FALSE) %>% 
-      layout(xaxis = list(fixedrange = TRUE), yaxis = list(fixedrange = TRUE))
+    ggplot() +
+      geom_tile(aes(x = 0, y = y, fill = x)) +
+      scale_fill_gradientn("",
+                           labels = scales::comma_format(),
+                           rescaler = ~ .,
+                           colors = color_vals,
+                           values = c(0,0.1,0.5,0.6,0.8,1)) +
+      theme_minimal() +
+      theme(
+        axis.line.x  = element_blank(), 
+        axis.text.x  = element_blank(), 
+        axis.ticks.x = element_blank(), 
+        axis.title.x = element_blank(), 
+        panel.background = element_blank(), 
+        panel.border     = element_blank(), 
+        panel.grid       = element_blank(), 
+        panel.spacing    = unit(0, "lines"), 
+        plot.background  = element_blank(), 
+        legend.justification = c(0, 0), 
+        legend.position = "none"
+      ) +
+      ylab("Taxa por 1,000 habitantes")
+  ) %>% 
+  ggplotly(tooltip = NULL) %>% 
+    config(displayModeBar = FALSE) %>% 
+    layout(xaxis = list(fixedrange = TRUE), yaxis = list(fixedrange = TRUE))
 }

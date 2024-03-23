@@ -1,12 +1,26 @@
 #' Return the maximum predicted date
 #' 
 #' @param all_data All the model data as specified in simulate_during_devel
+#' @param disease_name Name of the disease of interest
 #'
 #' @return The maximum observed date
 get_maxdate = function(all_data, disease_name = "Malaria"){
   all_data %>% 
     filter(type == "Observado" & disease == !!disease_name) %>%
     summarise(max(date)) %>% 
+    pull()
+}
+
+#' Return the maximum rate for one of the diseases
+#' 
+#' @param all_data All the model data as specified in simulate_during_devel
+#' @param disease_name Name of the disease of interest
+#'
+#' @return The maximum observed rate
+get_maxrate = function(all_data, disease_name = "Malaria"){
+  all_data %>% 
+    filter(disease == !!disease_name) %>%
+    summarise(max(rate)) %>% 
     pull()
 }
 

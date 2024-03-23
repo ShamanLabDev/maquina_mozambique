@@ -1,11 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
 rm(list = ls())
 library(shiny)
 library(reactablefmtr)
@@ -20,35 +12,28 @@ library(bslib)
 library(wesanderson)
 library(tidyr)
 
-# Define a function to generate a plot
-generate_plot <- function(region) {
-  # Example plot, replace this with your actual plotting function
-  plot <- plot_ly(x = 1:10, y = rnorm(10), type = 'scatter', mode = 'lines', name = region)
-  return(plot)
-}
-
 #Source all files of additional functions
 list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>% 
   walk(., source)
-
-#Get the time of the last update of the data
-last_updated_date = as.Date(file.info("data.csv")$ctime)
 
 #Get the shapefiles for the map
 mozmap = preprocess_map()
 
 #Read the data in a robust way
 all_data = get_data()
-maxrate  = max(all_data$rate)
 
 # Define UI for application that draws a histogram
-ui <- navbarPage(theme = bs_theme(preset = "sandstone", version = 5),
+ui <- navbarPage(
+  #Theme
+  theme = bs_theme(preset = "sandstone", version = 5),
 
-    # Application title
-    title = "MÁQUINA:", # Modelo de Análise Quantitativa para Doenças Infecciosas
-    get_disease_panel("Malária", "malaria"),
-    get_disease_panel("Doenças diarréicas","diarrhea"),
-    get_sobre_panel(),
+  # Application title
+  title = "MÁQUINA:", # Modelo de Análise Quantitativa para Doenças Infecciosas
+  
+  #Each of the panel's
+  get_disease_panel("Malária", "malaria"),
+  get_disease_panel("Doenças diarréicas","diarrhea"),
+  get_sobre_panel(),
 )
 
 # Define server logic required to draw a histogram
@@ -59,17 +44,17 @@ server <- function(input, output) {
   })
   
   output$malaria_map_past <- renderPlotly({
-    plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
+    plot_map(all_data, mozmap = mozmap, nweeks = week_input(), 
              disease_name = "Malaria", type = "Observado",
              title = paste0("Últimas ", week_input(), " semanas"))
   })
   
   output$malaria_range_ruler <- renderPlotly({
-    plot_rateguide(maxrate = maxrate, nweeks = week_input())
+    plot_rateguide(all_data, disease_name = "Malaria", nweeks = week_input())
   })
   
   output$malaria_map_future <- renderPlotly({
-    plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
+    plot_map(all_data, mozmap = mozmap, nweeks = week_input(),
              disease_name = "Malaria", type = "Previsto",
              title = paste0("Próximas ", week_input(), " semanas"))
   })
