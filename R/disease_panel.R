@@ -39,14 +39,15 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
      ),
      #Table-----
      card(
-       card_header("Dados"),
        fluidRow(
          column(12, align="center",
-                reactableOutput(paste0(value,"_table"), height = "500px", width = "100%"),
+                reactableOutput(paste0(value,"_table"), height = "550px", width = "100%"),
          )
        ),
      ),
-     p("This is a different paragraph that also contains numbers generated from the data"),
+     card(
+      p("This is a different paragraph that also contains numbers generated from the data"),
+     ),
      fluidRow(
        column(12, align="center",
           #uiOutput("plot_outputs")

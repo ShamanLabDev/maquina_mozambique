@@ -17,6 +17,8 @@ library(plotly)
 library(purrr)
 library(ggplot2)
 library(bslib)
+library(wesanderson)
+library(tidyr)
 
 # Define a function to generate a plot
 generate_plot <- function(region) {
@@ -37,30 +39,7 @@ mozmap = preprocess_map()
 
 #Read the data in a robust way
 all_data = get_data()
-
 maxrate  = max(all_data$rate)
-maxdate = get_maxdate(all_data) + days(1)
-
-nweeks = 2
-summary_data = all_data %>% 
-  filter(date  >= !!maxdate - weeks(nweeks) & 
-           date <=  !!maxdate + weeks(nweeks)) %>%   
-  group_by(Region, type, disease) %>% 
-  summarise(
-    incident_cases = sum(incident_cases), 
-    min_date       = min(date),
-    max_date       = max(date),
-    .groups = "drop") %>% 
-  arrange(type) %>% 
-  group_by(Region, disease) %>% 
-  mutate(trend = (incident_cases - lag(incident_cases))/lag(incident_cases)) %>% 
-  ungroup() %>% 
-  filter(!is.na(trend))  %>% 
-  select(-type) %>% 
-  mutate(period = paste0(format(min_date,"%b %d"), " a " ,format(max_date,"%b %d"))) %>% 
-  select(-min_date, -max_date)
-
-#Calculate the percent change in 
 
 # Define UI for application that draws a histogram
 ui <- navbarPage(theme = bs_theme(preset = "sandstone", version = 5),
@@ -80,11 +59,11 @@ server <- function(input, output) {
   })
   
   output$malaria_table <- renderReactable({
-    table_trend_cases(summary_data, disease_name = "Malaria")
+    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Malaria")
   })
   
   output$diarrhea_table <- renderReactable({
-    table_trend_cases(summary_data, disease_name = "Diarrhea")
+    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Diarrhea")
   })
   
   output$malaria_map_past <- renderPlotly({

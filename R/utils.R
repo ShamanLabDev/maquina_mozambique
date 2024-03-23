@@ -10,11 +10,31 @@ get_maxdate = function(all_data){
     pull()
 }
 
+get_periodo = function(summary_data){
+  paste0(
+    format(min(summary_data$date), "%d/%b/%Y"),
+    " a ",
+    format(max(summary_data$date) + days(6), "%d/%b/%Y")
+  )
+}
+
+get_periodo_observado = function(summary_data){
+  summary_data %>% 
+    filter(type == "Observado") %>% 
+    get_periodo()
+}
+
+get_periodo_previsto = function(summary_data){
+  summary_data %>% 
+    filter(type == "Previsto") %>% 
+    get_periodo()
+}
+
 #' Load the required data
 #' 
 #' @param fname Name of the file containing the data
 #'
-#' @return A tibble with the data
+#' @return A tibble with the data for the last year
 get_data = function(fname = "data.csv"){
   read_csv(fname, 
            col_types = cols(
