@@ -3,9 +3,9 @@
 #' @param all_data All the model data as specified in simulate_during_devel
 #'
 #' @return The maximum observed date
-get_maxdate = function(all_data){
+get_maxdate = function(all_data, disease_name = "Malaria"){
   all_data %>% 
-    filter(type == "Observado") %>%
+    filter(type == "Observado" & disease == !!disease_name) %>%
     summarise(max(date)) %>% 
     pull()
 }

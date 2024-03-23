@@ -58,14 +58,6 @@ server <- function(input, output) {
     input$nweeks
   })
   
-  output$malaria_table <- renderReactable({
-    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Malaria")
-  })
-  
-  output$diarrhea_table <- renderReactable({
-    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Diarrhea")
-  })
-  
   output$malaria_map_past <- renderPlotly({
     plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
              disease_name = "Malaria", type = "Observado",
@@ -80,6 +72,15 @@ server <- function(input, output) {
     plot_map(all_data, mozmap = mozmap, nweeks = week_input(), maxrate = maxrate,
              disease_name = "Malaria", type = "Previsto",
              title = paste0("Próximas ", week_input(), " semanas"))
+  })
+  
+  output$malaria_table <- renderReactable({
+    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Malaria")
+  })
+  
+  output$malaria_table_sub <-  renderUI({
+    table_trend_cases_footer(all_data, nweeks = week_input(), 
+                             disease_name = "Malaria")
   })
   
   # Number of plots to generate

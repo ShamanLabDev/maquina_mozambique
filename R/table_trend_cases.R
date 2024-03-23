@@ -4,7 +4,7 @@ table_trend_cases = function(all_data, nweeks = 2,
   
   
   #Adds 1 day so that it works also with previstos
-  maxdate = get_maxdate(all_data) + days(1)
+  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
   
   #Get only dates and disease of interest
   summary_data = all_data %>% 
@@ -85,4 +85,27 @@ table_trend_cases = function(all_data, nweeks = 2,
         )
       ) 
     
+}
+
+table_trend_cases_footer = function(all_data, 
+                                    nweeks = 2,
+                                    disease_name = "Malaria"){
+  
+  #Adds 1 day so that it works also with previstos
+  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
+  
+  #Get only dates and disease of interest
+  summary_data = all_data %>% 
+    filter(date  >= !!maxdate - weeks(nweeks) & 
+             date <=  !!maxdate + weeks(nweeks)) %>%   
+    filter(disease == !!disease_name)
+  
+  #Write the dates into footer
+  HTML(
+    paste0(
+      "<sup><b>Periodo observado:</b> ", get_periodo_observado(summary_data), " | ",
+      "<b>periodo previsto:</b> ", get_periodo_previsto(summary_data),"</sup>"
+    )
+  )
+  
 }

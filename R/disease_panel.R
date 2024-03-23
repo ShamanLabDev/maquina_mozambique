@@ -42,6 +42,9 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
        fluidRow(
          column(12, align="center",
                 reactableOutput(paste0(value,"_table"), height = "550px", width = "100%"),
+         ),
+         column(12, align = "right",
+                htmlOutput(paste0(value, "_table_sub"))
          )
        ),
      ),
