@@ -1,3 +1,14 @@
+#' TabPanel for a certain disease
+#' 
+#' @description Generates the tabpanel with name `tabname` for disease
+#' given by `value`.
+#' 
+#' @param tabname Name of the tab. 
+#' @param value Value of the disease in the output
+#'
+#' @details The output in the server side should have the outputs specified here.
+#' 
+#' @return A tabPanel for a disease
 get_disease_panel = function(tabname = "Malária", value = "malaria"){
   tabPanel(tabname,
      #Initial text----
@@ -28,6 +39,7 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
          )
        ),
      )),
+     #Slider----
      card(
        card_header(
        fluidRow(
@@ -58,11 +70,18 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
        #column(3, align="center",
        #    plotlyOutput("Maputo", height = "100px", width = "100%")
        #),
-     ),                
-     p("Lembre-se de que as projecções neste painel são geradas por um modelo 
-        automatizado e podem conter erros. A compreensão dos  conceitos 
-        epidemiológicos é essencial para uma interpretação correcta. 
-        Consulte fontes adicionais para obter o contexto."),
+     ),
+     #Warning card----
+     card(class = "bg-dark",
+        card_header("Aviso:"),
+        card_body(
+           p("Lembre-se de que as projecções neste painel são geradas por um modelo 
+              automatizado e podem conter erros. A compreensão dos  conceitos 
+              epidemiológicos é essencial para uma interpretação correcta. 
+              Consulte fontes adicionais para obter o contexto."),
+        )
+     ),
+     #Download button----
      card(
        fluidRow(
          column(6, align="center", offset = 3,

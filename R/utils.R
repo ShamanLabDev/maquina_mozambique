@@ -10,6 +10,13 @@ get_maxdate = function(all_data, disease_name = "Malaria"){
     pull()
 }
 
+#' Get text explaining the analysis period
+#' 
+#' Returns the min and max date of the analysis period of `summary_data`
+#' 
+#' @param summary_data A dataset with a `date` column
+#'
+#' @return The date range of the dataset as text. 
 get_periodo = function(summary_data){
   paste0(
     format(min(summary_data$date), "%d/%b/%Y"),
@@ -18,12 +25,30 @@ get_periodo = function(summary_data){
   )
 }
 
+#' Get text explaining the observed period
+#' 
+#' Returns the min and max date of the observed period of `summary_data`
+#' 
+#' @param summary_data A dataset with a `date` column and 
+#' a `type` column that includes whether it is `"Observado"` (observed)
+#' or not.
+#'
+#' @return The date range of the dataset's observations as text. 
 get_periodo_observado = function(summary_data){
   summary_data %>% 
     filter(type == "Observado") %>% 
     get_periodo()
 }
 
+#' Get text explaining the predicted period
+#' 
+#' Returns the min and max date of the predicted period of `summary_data`
+#' 
+#' @param summary_data A dataset with a `date` column and 
+#' a `type` column that includes whether it is `"Previsto"` (predicted)
+#' or not.
+#'
+#' @return The date range of the dataset's predictions as text. 
 get_periodo_previsto = function(summary_data){
   summary_data %>% 
     filter(type == "Previsto") %>% 
@@ -45,4 +70,43 @@ get_data = function(fname = "data.csv"){
              type = col_character()
            )) %>% 
     filter(date > max(date) - years(1)) 
+}
+
+#' Filter data to dates and disease for some weeks
+#' 
+#' Filters the dataset for creating the table and map. Keeps only
+#' observations for a disease in a date range of `nweeks` including the
+#' last observed `nweeks` and the first predicted `nweeks`. 
+#' 
+#' @param all_data Dataset with entry for `date`, `disease`, and `type` (if
+#' type is specified)
+#' @param nweeks Number of weeks of observed and/or predicted to include. 
+#' @param disease_name Name of the disease to keep in the filter
+#' @param type Type of the observation whether `"Previsto"` (predicted) or
+#' `"Observado"`. 
+#' 
+#' @details If dataset only includes `"Previsto"`s or `"Observado"`s 
+#' cases and no type is specified it will fail.  
+#' 
+#' @return A dataframe filtered for the disease in `disease_name`, for 
+#' dates that range for the last `nweeks` of observed data and the first
+#' `nweeks` of predicted data.  
+#' 
+filter_nweeks = function(all_data, nweeks, disease_name, type = NULL){
+  
+  #Adds 1 day so that it works also with previstos
+  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
+  
+  #Filters the data 
+  summary_data = all_data %>% 
+    filter(date  >= !!maxdate - weeks(nweeks) & 
+             date <=  !!maxdate + weeks(nweeks)) %>%   
+    filter(disease == !!disease_name)
+  
+  if (!is.null(type)){
+    summary_data = summary_data %>% 
+      filter(type == !!type[1])
+  }
+  
+  return(summary_data)
 }

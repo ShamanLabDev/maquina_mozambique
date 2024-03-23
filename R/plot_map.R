@@ -30,14 +30,8 @@ plot_map = function(all_data, mozmap, nweeks = 2,
                     color_vals = wesanderson::wes_palette("Zissou1")){
 
   
-  #Adds 1 day so that it works also with previstos
-  maxdate = get_maxdate(all_data) + days(1)
-
   #Obtain the data for the disease, type and dates of analysis
-  summary_data = all_data %>% 
-    filter(disease == !!disease_name & type == !!type[1]) %>% 
-    filter(date  >= !!maxdate - weeks(nweeks) & 
-             date <=  !!maxdate + weeks(nweeks)) 
+  summary_data = filter_nweeks(all_data, nweeks, disease_name, type)
   
   (
     summary_data  %>% 

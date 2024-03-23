@@ -3,14 +3,8 @@ table_trend_cases = function(all_data, nweeks = 2,
                              fill_color = c("#78B7C5", "#E1AF00")){
   
   
-  #Adds 1 day so that it works also with previstos
-  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
-  
-  #Get only dates and disease of interest
-  summary_data = all_data %>% 
-    filter(date  >= !!maxdate - weeks(nweeks) & 
-             date <=  !!maxdate + weeks(nweeks)) %>%   
-    filter(disease == !!disease_name)
+  #Get the data for the analysis period and disease of interest
+  summary_data = all_data %>% filter_nweeks(nweeks, disease_name)
   
   dbf = summary_data %>% 
     group_by(Region, type) %>% 
@@ -83,22 +77,32 @@ table_trend_cases = function(all_data, nweeks = 2,
       defaultColDef = colDef(
         headerClass = "card-header"
         )
-      ) 
-    
+      )
 }
 
+#' Create footer for trend/cases table
+#' 
+#' Creates the footer HTML element for the table that specifies the
+#' trend and cases. 
+#' 
+#' @details 
+#' The footer changes as the number of weeks changes to specify the date
+#' range from when the data is collected. 
+#' 
+#' @param all_data Data frame containing all the data
+#' @param nweeks Number of weeks in the analysis 
+#' @param disease_name Name of the disease in `all_data`
+#' 
+#' @return An HTML element that works inside a `renderUI` and generates
+#' the observed and predicted period dates. 
 table_trend_cases_footer = function(all_data, 
                                     nweeks = 2,
                                     disease_name = "Malaria"){
   
-  #Adds 1 day so that it works also with previstos
-  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
+  
   
   #Get only dates and disease of interest
-  summary_data = all_data %>% 
-    filter(date  >= !!maxdate - weeks(nweeks) & 
-             date <=  !!maxdate + weeks(nweeks)) %>%   
-    filter(disease == !!disease_name)
+  summary_data = all_data %>% filter_nweeks(nweeks, disease_name)
   
   #Write the dates into footer
   HTML(
@@ -107,5 +111,4 @@ table_trend_cases_footer = function(all_data,
       "<b>periodo previsto:</b> ", get_periodo_previsto(summary_data),"</sup>"
     )
   )
-  
 }

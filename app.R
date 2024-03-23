@@ -75,7 +75,8 @@ server <- function(input, output) {
   })
   
   output$malaria_table <- renderReactable({
-    table_trend_cases(all_data, nweeks = week_input(), disease_name = "Malaria")
+    table_trend_cases(all_data, nweeks = week_input(), 
+                      disease_name = "Malaria")
   })
   
   output$malaria_table_sub <-  renderUI({
