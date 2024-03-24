@@ -124,3 +124,13 @@ filter_nweeks = function(all_data, nweeks, disease_name, type = NULL){
   
   return(summary_data)
 }
+
+#' Get plot limits
+#'
+#' Returns the limits for the regional plot of `disease_name`
+get_plot_limits = function(all_data, disease_name){
+  all_data %>% 
+    filter(disease == !!disease_name) %>% 
+    summarise(min_cases = min(incident_cases_low),
+              max_cases = max(incident_cases_upp))
+}

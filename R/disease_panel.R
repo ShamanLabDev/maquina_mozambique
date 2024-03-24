@@ -9,7 +9,7 @@
 #' @details The output in the server side should have the outputs specified here.
 #' 
 #' @return A tabPanel for a disease
-get_disease_panel = function(tabname = "Malária", value = "malaria"){
+get_disease_panel = function(tabname = "Malária", value = "malaria", regions){
   tabPanel(tabname,
      #Initial text----
      card(
@@ -44,7 +44,8 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
        card_header(
        fluidRow(
          column(4, offset = 4,
-                sliderInput("nweeks", "Número de semanas:",
+                sliderInput(paste0("nweeks_",value), "Número de semanas:",
+                            round = TRUE,
                             min = 1, max = 16, value = 2, step = 1, width = "100%"),
          )
        ))
@@ -64,12 +65,109 @@ get_disease_panel = function(tabname = "Malária", value = "malaria"){
       p("This is a different paragraph that also contains numbers generated from the data"),
      ),
      fluidRow(
-       column(12, align="center",
-          #uiOutput("plot_outputs")
-       )
-       #column(3, align="center",
-       #    plotlyOutput("Maputo", height = "100px", width = "100%")
-       #),
+       column(3, align="center",
+          card(
+            card_header(regions[1]),
+            card_body(
+              plotlyOutput(outputId = paste0(value,"_", 1),
+                           width = "100%", height = "200px") 
+            )
+          )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[2]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 2),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[3]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 3),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[4]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 4),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+     ),
+     fluidRow(
+       column(3, align="center",
+              card(
+                card_header(regions[5]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 5),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[6]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 6),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[7]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 7),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[8]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 8),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+     ),
+     fluidRow(
+       column(3, align="center", offset = 2,
+              card(
+                card_header(regions[9]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 9),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[10]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 10),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
+       column(3, align="center",
+              card(
+                card_header(regions[11]),
+                card_body(
+                  plotlyOutput(outputId = paste0(value,"_", 11),
+                               width = "100%", height = "200px") 
+                )
+              )
+       ),
      ),
      #Warning card----
      card(class = "bg-dark",

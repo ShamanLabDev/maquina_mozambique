@@ -43,7 +43,7 @@ plot_map = function(all_data, mozmap, nweeks = 2,
                            rate_fmt,"/1000 habitantes")) %>% 
       left_join(mozmap, by = join_by(Region)) %>% 
       ggplot() +
-        geom_sf(aes(geometry = geometry, fill = rate, text = text), 
+        geom_sf(aes(geometry = geometry, fill = rate, text = text),
                 color = "white", linewidth = 0.1) +
         theme_void() +
         theme(
