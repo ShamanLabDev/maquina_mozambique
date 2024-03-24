@@ -16,11 +16,8 @@ table_trend_cases = function(all_data, nweeks = 2,
                              disease_name = "Malaria",
                              fill_color = c("#78B7C5", "#E1AF00")){
   
-  
-  #Get the data for the analysis period and disease of interest
-  summary_data = all_data %>% filter_nweeks(nweeks, disease_name)
-  
-  dbf = summary_data %>% 
+  dbf = all_data %>% 
+    filter_nweeks(nweeks, disease_name) %>% 
     group_by(Region, type) %>% 
     summarise(
       incident_cases     = sum(incident_cases),

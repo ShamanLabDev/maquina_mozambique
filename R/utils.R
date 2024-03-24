@@ -125,9 +125,42 @@ filter_nweeks = function(all_data, nweeks, disease_name, type = NULL){
   return(summary_data)
 }
 
+#' Compute the trend for incident cases
+#' 
+#' Obtains the trend of the dataset to know whether the incident cases
+#' are increasing or decreasing
+#' 
+#' @param all_data Dataset with entry for `date`, `disease`
+#' @param nweeks Number of weeks of observed and/or predicted to include. 
+#' @param disease_name Name of the disease to keep in the filter
+#' 
+#' @return A dataframe filtered for the disease in `disease_name`, for 
+#' dates that range for the last `nweeks` of observed data and the first
+#' `nweeks` of predicted data. It also contains the trend.  
+#' 
+is_trend_increasing = function(all_data, disease_name = "Malaria", region = "Sofala"){
+  
+  #Adds 1 day so that it works also with previstos
+  cases = all_data %>% 
+    filter(Region == !!region & disease == !!disease_name) %>% 
+    group_by(type) %>% 
+    filter(date == max(date)) %>% 
+    ungroup() %>% 
+    arrange(date) %>% 
+    pull(incident_cases) 
+  
+  cases[2] > cases[1]
+
+}
+
 #' Get plot limits
 #'
 #' Returns the limits for the regional plot of `disease_name`
+#' @param all_data A dataset with diseases given by `disease` and a collection
+#' of incident cases with confidence interval given by `incident_cases_low`
+#' and `incident_cases_upp`. 
+#' @param disease_name Name of the disease of interest in column `disease` of
+#' `all_data` 
 get_plot_limits = function(all_data, disease_name){
   all_data %>% 
     filter(disease == !!disease_name) %>% 

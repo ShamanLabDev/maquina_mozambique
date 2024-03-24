@@ -2,9 +2,14 @@ plot_forecast = function(all_data,
                          disease_name = "Malaria",
                          region = "Sofala",
                          last_updated_date = today(), 
-                         color_vals = c("gray75","tomato3")){
+                         color_vals = c("gray75","#78B7C5", "#E1AF00")){
   
   plot_y_limits = get_plot_limits(all_data, disease_name)
+  
+  overall_trend = is_trend_increasing(all_data, region = region,
+                                      disease_name = disease_name)
+  
+  prediction_color = ifelse(overall_trend, color_vals[3], color_vals[2])
   
   (all_data %>% 
     filter(disease == !!disease_name) %>% 
@@ -38,8 +43,8 @@ plot_forecast = function(all_data,
       strip.background = element_rect(color = "black", fill = "black"),
       strip.text = element_text(color = "white", face = "bold")
     ) +
-    scale_color_manual("", values = color_vals) +
-    scale_fill_manual("", values = color_vals) +
+    scale_color_manual("", values = c(color_vals[1], prediction_color)) +
+    scale_fill_manual("", values = c(color_vals[1], prediction_color)) +
     scale_y_continuous(labels = scales::comma_format(),
                        limits = c(plot_y_limits$min_cases[1],
                                   plot_y_limits$max_cases[1])) +
