@@ -15,7 +15,7 @@ plot_forecast = function(all_data,
     filter(disease == !!disease_name) %>% 
     filter(Region == !!region) %>% 
     mutate(text = paste0(
-      "<sup>", format(date,"%d/%b/%y"), "</sup><br>",
+      "<i>", format(date,"%d/%b/%y"), "</i><br>",
       "Casos: ", scales::comma(incident_cases, 1)
     )) %>% 
     mutate(text = if_else(

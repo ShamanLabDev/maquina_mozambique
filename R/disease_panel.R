@@ -25,7 +25,7 @@ get_disease_panel = function(tabname = "Malária", value = "malaria", regions){
      ),
      #Plots----
      card(
-       card_header("Incidência [Total de casos]"),
+       card_header("Incidência Acumulada [Total de casos previstos]"),
        card_body(
        fluidRow(
          column(5, align="center",
