@@ -44,7 +44,7 @@ get_disease_panel = function(tabname = "Malária", value = "malaria", regions){
        card_header(
        fluidRow(
          column(4, offset = 4,
-                sliderInput(paste0("nweeks_",value), "Número de semanas:",
+                sliderInput(paste0("nweeks_",value), "Semana:",
                             round = TRUE,
                             min = 1, max = 16, value = 2, step = 1, width = "100%"),
          )

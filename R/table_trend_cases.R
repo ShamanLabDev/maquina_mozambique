@@ -17,7 +17,13 @@ table_trend_cases = function(all_data, nweeks = 2,
                              fill_color = c("#78B7C5", "#E1AF00")){
   
   dbf = all_data %>% 
-    filter_nweeks(nweeks, disease_name) %>% 
+    filter_nweeks(0, disease_name) %>% 
+    mutate(type = "Observado") |> 
+    bind_rows(
+      all_data %>% 
+        filter_nweeks(nweeks, disease_name) %>% 
+        mutate(type = "Previsto") 
+    ) |> 
     group_by(Region, type) %>% 
     summarise(
       incident_cases     = sum(incident_cases),
@@ -51,19 +57,19 @@ table_trend_cases = function(all_data, nweeks = 2,
       columns = list(
         Region         = colDef(sticky = "left", name = "Região"),
         incident_cases_Previsto = colDef(
-          name = paste0("Casos previstos (", nweeks, " semanas)"), 
+          name = paste0("Casos previstos dentro de ", nweeks, " semanas"), 
           minWidth = 150,
           format = colFormat(separators = TRUE, digits = 0)),
         incident_cases_Observado = colDef(
-          name = paste0("Casos anteriores (", nweeks, " semanas)"),
+          name = paste0("Observação semana mais recente"),
           minWidth = 150,
           format = colFormat(separators = TRUE, digits = 0)),
         incident_range = colDef(
-          name = "Casos previstos (intervalo)",
+          name = paste0("Casos previstos dentro de ", nweeks, " semanas (intervalo)"),
           minWidth = 125
         ),
         incident_trend_Previsto = colDef(
-          name = "Tendência",
+          name = paste0("Tendência (semana ", nweeks, " contra mais recente)"),
           minWidth = 125,
           cell = data_bars(dbf, 
                            text_color = "gray75",
@@ -73,15 +79,15 @@ table_trend_cases = function(all_data, nweeks = 2,
                            number_fmt = scales::percent,
                            force_outside = c(-1,1))),
         rate_Observado = colDef(
-          name = "Taxa observada",
+          name = "Taxa observada semana mais recente",
           minWidth = 125,
           format = colFormat(separators = TRUE, digits = 2)),
         rate_Previsto = colDef(
-          name = "Taxa prevista",
+          name = paste0("Taxa prevista dentro de ", nweeks, " semanas"),
           minWidth = 125,
           format = colFormat(separators = TRUE, digits = 2)),
         rate_range = colDef(
-          name = "Taxa prevista (intervalo)",
+          name = paste0("Taxa prevista dentro de ", nweeks, " semanas (intervalo)"),
           minWidth = 125
         )
       ),
@@ -113,13 +119,14 @@ table_trend_cases_footer = function(all_data,
   
   
   #Get only dates and disease of interest
-  summary_data = all_data %>% filter_nweeks(nweeks, disease_name)
+  summary_data_obs  = all_data %>% filter_nweeks(0, disease_name)
+  summary_data_pred = all_data %>% filter_nweeks(nweeks, disease_name)
   
   #Write the dates into footer
   HTML(
     paste0(
-      "<sup><b>Periodo observado:</b> ", get_periodo_observado(summary_data), " | ",
-      "<b>periodo previsto:</b> ", get_periodo_previsto(summary_data),"</sup>"
+      "<sup><b>Observado:</b> ", get_periodo(summary_data_obs), " | ",
+      "<b>Previsto:</b> ", get_periodo(summary_data_pred),"</sup>"
     )
   )
 }

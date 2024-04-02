@@ -21,7 +21,16 @@ list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>%
 mozmap = preprocess_map()
 
 #Read the data in a robust way
-all_data = get_data()
+all_data = get_data("2019_09_30_combined.csv") |> 
+  mutate(Region = str_to_title(Region)) |> 
+  mutate(Region = case_when(
+    Region == "Maputo Cidade" ~ "Maputo (cidade)",
+    Region == "Zambezia" ~ "Zambézia",
+    Region == "Maputo Provincia" ~ "Maputo",
+    .default = Region
+  )) |> 
+  mutate(disease = str_to_sentence(disease))
+
 regions  = sort(unique(all_data$Region))
 
 
@@ -49,9 +58,9 @@ server <- function(input, output, session) {
   })
   
   output$malaria_map_past <- renderPlotly({
-    plot_map(all_data, mozmap = mozmap, nweeks = week_input_malaria(),
+    plot_map(all_data, mozmap = mozmap, nweeks = 0,
              disease_name = "Malaria", type = "Observado",
-             title = paste0("Últimas ", week_input_malaria(), " semanas"))
+             title = paste0("Observação semana mais recente"))
   })
 
   output$malaria_range_ruler <- renderPlotly({
@@ -61,7 +70,7 @@ server <- function(input, output, session) {
   output$malaria_map_future <- renderPlotly({
     plot_map(all_data, mozmap = mozmap, nweeks = week_input_malaria(),
              disease_name = "Malaria", type = "Previsto",
-             title = paste0("Próximas ", week_input_malaria(), " semanas"))
+             title = paste0("Previsto em ", week_input_malaria(), " semanas"))
   })
 
   output$malaria_table <- renderReactable({
@@ -87,7 +96,7 @@ server <- function(input, output, session) {
   })
   
   output$diarrhea_map_past <- renderPlotly({
-    plot_map(all_data, mozmap = mozmap, nweeks = week_input_diarrhea(),
+    plot_map(all_data, mozmap = mozmap, nweeks = 0,
              disease_name = "Diarrhea", type = "Observado",
              title = paste0("Últimas ", week_input_diarrhea(), " semanas"))
   })

@@ -21,7 +21,7 @@
 #' `type == "Observado"`
 #' 
 #' @return A plotly object with the legend. 
-plot_map = function(all_data, mozmap, nweeks = 2, 
+plot_map = function(all_data, mozmap, nweeks = 0, 
                     disease_name = "Malaria",
                     title = "Cases",
                     type = c("Observado", "Previsto"),
@@ -30,21 +30,53 @@ plot_map = function(all_data, mozmap, nweeks = 2,
 
   #Get the maximum observed rate for color palette
   maxrate = get_maxrate(all_data, disease_name)
+  minrate = get_minrate(all_data, disease_name)
   
   #Obtain the data for the disease, type and dates of analysis
-  summary_data = filter_nweeks(all_data, nweeks, disease_name, type)
+  summary_data = filter_nweeks(all_data, nweeks, disease_name)
   
-  (
-    summary_data  %>% 
+  mapdata <- summary_data  %>% 
       group_by(Region) %>% 
       summarise(rate = sum(rate), .groups = "drop") %>% 
-      mutate(rate_fmt = scales::comma(rate, accuracy = 0.01)) %>% 
+      mutate(rate_fmt = scales::comma(rate, accuracy = 1.0)) %>% 
       mutate(text = paste0("<b>", Region,"</b>", "<br>", 
-                           rate_fmt,"/1000 habitantes")) %>% 
-      left_join(mozmap, by = join_by(Region)) %>% 
-      ggplot() +
+                           rate_fmt,"/100,000 habitantes"))%>% 
+      left_join(mozmap, by = join_by(Region)) 
+  
+  #Generate maputo and save it
+  temputo <- tempfile(fileext = ".png")
+  maputo  <- ggplot(mapdata |> filter(Region == "Maputo (cidade)")) +
+    geom_sf(aes(geometry = geometry, fill = rate, text = text),
+            linewidth = 0.0) +
+    theme_void() +
+    theme(
+      axis.line  = element_blank(), 
+      axis.text  = element_blank(), 
+      axis.ticks = element_blank(), 
+      axis.title = element_blank(), 
+      panel.background = element_blank(), 
+      panel.border     = element_rect(color = "black", linewidth = 3), 
+      panel.grid       = element_blank(), 
+      panel.spacing    = unit(0, "lines"), 
+      plot.background  = element_blank(), 
+      legend.justification = c(0, 0), 
+      legend.position  = "none",
+    ) +
+    scale_fill_gradientn("",
+                         labels = scales::comma_format(),
+                         rescaler = ~ (. - minrate)/(maxrate - minrate),
+                         colors = color_vals,
+                         values = c(0,0.1,0.5,0.6,0.8,1)) 
+  ggsave(temputo, maputo, dpi = 300, width = 5, height = 4)
+  
+  img <- readPNG(temputo)
+  (ggplot(mapdata) +
         geom_sf(aes(geometry = geometry, fill = rate, text = text),
-                color = "white", linewidth = 0.1) +
+                color = bg_color, linewidth = 0.1) +
+        geom_point(aes(x = 38, y = -25.5, text = text),
+                   color = bg_color, fill = bg_color,
+              size = 14, 
+              data = mapdata |> filter(Region == "Maputo (cidade)")) +
         theme_void() +
         theme(
           axis.line  = element_blank(), 
@@ -65,16 +97,21 @@ plot_map = function(all_data, mozmap, nweeks = 2,
         ) + 
         scale_fill_gradientn("",
                              labels = scales::comma_format(),
-                             rescaler = ~ 1 / (1 + exp(-(./nweeks -  maxrate/2))),
+                             rescaler = ~ (. - minrate)/(maxrate - minrate),
                              colors = color_vals,
-                             values = c(0,0.1,0.5,0.6,0.8,1))
-  ) %>% 
+                             values = c(0,0.1,0.5,0.6,0.8,1)) +
+      annotate("segment", x = 32.5, xend = 36, y = -26, yend = -24.6, color = "black",
+               linewidth = 0.2) +
+      annotate("segment", x = 32.5, xend = 36, y = -26, yend = -26.4, color = "black",
+               linewidth = 0.2) +
+      annotation_raster(img, xmin = 36, xmax = 40, ymin = -27, ymax = -24)
+    ) %>% 
     ggplotly(tooltip = "text") %>% 
       config(displayModeBar = FALSE) %>% 
       style(hoverlabel = list(bgcolor = bg_color), hoveron = "text") %>% 
       layout(title = list(
         text = paste0(title,"<br><sup>", get_periodo(summary_data),"</sup>")))
-
+  
 }
 
 #' Create legend for the map plot
@@ -92,11 +129,12 @@ plot_rateguide = function(all_data, disease_name = "Malaria", nweeks = 2,
   
   #Get the maximum observed rate for color palette
   maxrate = get_maxrate(all_data, disease_name)
+  minrate = get_minrate(all_data, disease_name)
   
   (
     tibble(
-      y = seq(0, nweeks*maxrate, length.out = 100), 
-      x = 1 / (1 + exp(-(y/nweeks -  maxrate/2)))
+      y = seq(minrate, maxrate, length.out = 100), 
+      x = (y - minrate)/(maxrate - minrate)
     ) %>% 
     ggplot() +
       geom_tile(aes(x = 0, y = y, fill = x)) +
@@ -119,7 +157,9 @@ plot_rateguide = function(all_data, disease_name = "Malaria", nweeks = 2,
         legend.justification = c(0, 0), 
         legend.position = "none"
       ) +
-      ylab("Taxa por 1,000 habitantes")
+      ylab("Taxa por 100,000 habitantes") +
+      scale_y_continuous(labels = scales::comma_format(), n.breaks = 10,
+                         position = "right")
   ) %>% 
   ggplotly(tooltip = NULL) %>% 
     config(displayModeBar = FALSE) %>% 

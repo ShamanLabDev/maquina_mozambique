@@ -17,10 +17,25 @@ get_maxdate = function(all_data, disease_name = "Malaria"){
 #' @param disease_name Name of the disease of interest
 #'
 #' @return The maximum observed rate
-get_maxrate = function(all_data, disease_name = "Malaria"){
+get_maxrate = function(all_data, disease_name = "Malaria", maxdate = get_maxdate(all_data, disease_name)){
   all_data %>% 
     filter(disease == !!disease_name) %>%
+    filter(type == "Previsto" | date == !!maxdate) |> 
     summarise(max(rate)) %>% 
+    pull()
+}
+
+#' Return the minimum rate for one of the diseases
+#' 
+#' @param all_data All the model data as specified in simulate_during_devel
+#' @param disease_name Name of the disease of interest
+#'
+#' @return The maximum observed rate
+get_minrate = function(all_data, disease_name = "Malaria", maxdate = get_maxdate(all_data, disease_name)){
+  all_data %>% 
+    filter(disease == !!disease_name) %>%
+    filter(type == "Previsto" | date == !!maxdate) |> 
+    summarise(min(rate)) %>% 
     pull()
 }
 
@@ -80,7 +95,7 @@ get_data = function(fname = "data.csv"){
              Region  = col_character(),
              disease = col_character(),
              .default = col_double(),
-             date = col_date(format = "%Y-%m-%d"),
+             date = col_date(format = "%m/%d/%y"),
              type = col_character()
            )) %>% 
     filter(date > max(date) - years(1)) 
@@ -106,21 +121,17 @@ get_data = function(fname = "data.csv"){
 #' dates that range for the last `nweeks` of observed data and the first
 #' `nweeks` of predicted data.  
 #' 
-filter_nweeks = function(all_data, nweeks, disease_name, type = NULL){
+filter_nweeks = function(all_data, nweeks, disease_name){
   
   #Adds 1 day so that it works also with previstos
-  maxdate = get_maxdate(all_data, disease_name = disease_name) + days(1)
+  maxdate = get_maxdate(all_data, disease_name = disease_name)
   
   #Filters the data 
   summary_data = all_data %>% 
-    filter(date  >= !!maxdate - weeks(nweeks) & 
-             date <=  !!maxdate + weeks(nweeks)) %>%   
+    #filter(date  >= !!maxdate - weeks(nweeks) & 
+    #         date <=  !!maxdate + weeks(nweeks)) %>%
+    filter(date  == !!maxdate + weeks(nweeks)) %>%   
     filter(disease == !!disease_name)
-  
-  if (!is.null(type)){
-    summary_data = summary_data %>% 
-      filter(type == !!type[1])
-  }
   
   return(summary_data)
 }
