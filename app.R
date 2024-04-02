@@ -12,6 +12,7 @@ library(ggplot2)
 library(bslib)
 library(wesanderson)
 library(tidyr)
+library(png)
 
 #Preprocessing----
 list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>% 
