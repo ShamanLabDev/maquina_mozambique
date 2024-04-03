@@ -67,9 +67,13 @@ plot_map = function(all_data, mozmap, nweeks = 0,
                          rescaler = ~ (. - minrate)/(maxrate - minrate),
                          colors = color_vals,
                          values = c(0,0.1,0.5,0.6,0.8,1)) 
-  ggsave(temputo, maputo, dpi = 300, width = 5, height = 4)
+  ggsave(temputo, maputo, dpi = 150, width = 5, height = 4)
   
+  #Create the file
   img <- readPNG(temputo)
+  
+  #Remove the temporary file
+  file.remove(temputo)
   (ggplot(mapdata) +
         geom_sf(aes(geometry = geometry, fill = rate, text = text),
                 color = bg_color, linewidth = 0.1) +
