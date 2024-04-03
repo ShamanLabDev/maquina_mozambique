@@ -13,6 +13,7 @@ library(bslib)
 library(wesanderson)
 library(tidyr)
 library(png)
+library(stringr)
 
 #Preprocessing----
 list.files("R/", pattern = "*.R", all.files = T, full.names = T) %>% 
