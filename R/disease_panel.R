@@ -16,11 +16,11 @@ get_disease_panel = function(tabname = "Malária", value = "malaria", regions){
        fluidRow(
          column(12,
             h2(tabname, class = "lead mt-3"),
-            p("This text is automatic from the data:
-               A total of 1,000 new cases are expected in the next two weeks
-               with Cabo Delgado (1,181), Maputo (1,539), and Gaza (1,539) 
-               seeing the largest increase. The trend is currently decreasing 
-               with the highest decrements happening in Nampula, Maputo, and Sofala.")
+            #p("This text is automatic from the data:
+            #   A total of 1,000 new cases are expected in the next two weeks
+            #   with Cabo Delgado (1,181), Maputo (1,539), and Gaza (1,539) 
+            #   seeing the largest increase. The trend is currently decreasing 
+            #   with the highest decrements happening in Nampula, Maputo, and Sofala.")
         )),
      ),
      #Plots----
@@ -61,9 +61,9 @@ get_disease_panel = function(tabname = "Malária", value = "malaria", regions){
          )
        ),
      ),
-     card(
-      p("This is a different paragraph that also contains numbers generated from the data"),
-     ),
+     #card(
+     #  p("This is a different paragraph that also contains numbers generated from the data"),
+     #),
      fluidRow(
        column(3, align="center",
           card(

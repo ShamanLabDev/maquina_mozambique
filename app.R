@@ -48,7 +48,7 @@ ui <- navbarPage(
   #Disease panels----
   get_disease_panel("Malária", "malaria", regions = regions),
   get_disease_panel("Doenças diarréicas","diarrhea", regions = regions),
-  get_sobre_panel(),
+  #get_sobre_panel(),
 )
 
 # Server-----
