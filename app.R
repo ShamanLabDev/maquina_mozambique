@@ -72,7 +72,7 @@ server <- function(input, output, session) {
   output$malaria_map_future <- renderPlotly({
     plot_map(all_data, mozmap = mozmap, nweeks = week_input_malaria(),
              disease_name = "Malaria", type = "Previsto",
-             title = paste0("Previsto em ", week_input_malaria(), " semanas"))
+             title = paste0("Previsto dentro de ", week_input_malaria(), " semanas"))
   })
 
   output$malaria_table <- renderReactable({
@@ -100,7 +100,7 @@ server <- function(input, output, session) {
   output$diarrhea_map_past <- renderPlotly({
     plot_map(all_data, mozmap = mozmap, nweeks = 0,
              disease_name = "Diarrhea", type = "Observado",
-             title = paste0("Últimas ", week_input_diarrhea(), " semanas"))
+             title = paste0("Observação semana mais recente"))
   })
   
   output$diarrhea_range_ruler <- renderPlotly({
@@ -110,7 +110,7 @@ server <- function(input, output, session) {
   output$diarrhea_map_future <- renderPlotly({
     plot_map(all_data, mozmap = mozmap, nweeks = week_input_diarrhea(),
              disease_name = "Diarrhea", type = "Previsto",
-             title = paste0("Próximas ", week_input_diarrhea(), " semanas"))
+             title = paste0("Previsto dentro de ", week_input_diarrhea(), " semanas"))
   })
   
   output$diarrhea_table <- renderReactable({

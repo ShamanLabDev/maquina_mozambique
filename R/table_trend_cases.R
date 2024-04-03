@@ -44,9 +44,8 @@ table_trend_cases = function(all_data, nweeks = 2,
     mutate(rate_range = 
              paste0(scales::comma(rate_low_Previsto, 0.1), " a ", 
                     scales::comma(rate_up_Previsto, 0.1))) %>% 
-    select(Region, incident_trend_Previsto, incident_cases_Previsto,
-           incident_range, incident_cases_Observado,  rate_Previsto, 
-           rate_range, rate_Observado)
+    select(Region, incident_trend_Previsto, incident_cases_Observado, incident_cases_Previsto,
+           incident_range, rate_Observado, rate_Previsto, rate_range)
   
     reactable(
       dbf,
